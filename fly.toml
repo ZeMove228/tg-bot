@@ -1,10 +1,9 @@
-﻿app = 'tg-bot-zemove'
+app = 'tg-bot-zemove'
 primary_region = 'fra'
 
-[[services]]
-  internal_port = 8080
-  protocol = 'tcp'
+[build]
 
-  [[services.tcp_checks]]
-    interval = '15s'
-    timeout = '2s'
+[[vm]]
+  memory = '256mb'
+  cpu_kind = 'shared'
+  cpus = 1

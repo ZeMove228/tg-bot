@@ -6,7 +6,7 @@
 BOT_TOKEN = "8988853545:AAFyCWL8ve15MPMR3yZKtQfLNovtgnS5lX0"
 
 # 2. The registration link sent after the user joins all channels
-REGISTRATION_LINK = "⏳ Registration link will be available soon. Stay tuned!"
+REGISTRATION_LINK = "https://new-form-project-37c3ad.zapier.app/cau-international-olympiad-2026"
 
 # 3. The two channels users must join.
 CHANNELS = [
@@ -16,9 +16,9 @@ CHANNELS = [
         "url": "https://t.me/ilmiyAcademy",
     },
     {
-        "id": "@CAUofficialuz",
-        "name": "CAU Official",
-        "url": "https://t.me/CAUofficialuz",
+        "id": "@centralasianuni",
+        "name": "Central Asian University",
+        "url": "https://t.me/centralasianuni",
     },
 ]
 
