@@ -1,5 +1,6 @@
 import logging
-import asyncio
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ChatMember
 from telegram.ext import (
     Application,
@@ -16,8 +17,22 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+class HealthHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b"OK")
+    def log_message(self, format, *args):
+        pass
+
+def run_health_server():
+    server = HTTPServer(("0.0.0.0", 8080), HealthHandler)
+    server.serve_forever()
+
+
 async def check_membership(bot, user_id: int, channel: dict) -> bool:
-    """Check if user is a member of a channel."""
+    if not channel.get("check", True):
+        return True
     try:
         member = await bot.get_chat_member(chat_id=channel["id"], user_id=user_id)
         return member.status in [
@@ -31,7 +46,6 @@ async def check_membership(bot, user_id: int, channel: dict) -> bool:
 
 
 def build_channels_keyboard(joined_statuses: list[bool]) -> InlineKeyboardMarkup:
-    """Build keyboard with channel buttons and check/verify button."""
     buttons = []
     for i, channel in enumerate(CHANNELS):
         status_icon = "✅" if joined_statuses[i] else "🔗"
@@ -51,7 +65,6 @@ def build_channels_keyboard(joined_statuses: list[bool]) -> InlineKeyboardMarkup
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handle /start command."""
     user = update.effective_user
     user_id = user.id
 
@@ -79,7 +92,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def check_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handle 'Check Membership' button press."""
     query = update.callback_query
     await query.answer("Checking your memberships...")
 
@@ -109,13 +121,11 @@ async def check_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 
 
 async def get_link_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handle 'Get Registration Link' button press."""
     query = update.callback_query
     await query.answer()
 
     user_id = query.from_user.id
 
-    # Final verification before sending the link
     statuses = [
         await check_membership(context.bot, user_id, ch)
         for ch in CHANNELS
@@ -125,7 +135,7 @@ async def get_link_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         await query.edit_message_text(
             f"🎉 Congratulations! You're all set.\n\n"
             f"{REGISTRATION_LINK}\n\n"
-            f"Good luck! 🚀"
+            f"Good luck!"
         )
     else:
         not_joined = [CHANNELS[i]["name"] for i, s in enumerate(statuses) if not s]
@@ -137,6 +147,7 @@ async def get_link_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
 
 def main() -> None:
+    threading.Thread(target=run_health_server, daemon=True).start()
     app = Application.builder().token(BOT_TOKEN).build()
 
     app.add_handler(CommandHandler("start", start))
