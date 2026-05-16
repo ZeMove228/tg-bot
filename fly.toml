@@ -1,0 +1,10 @@
+@"
+app = 'tg-bot-zemove'
+primary_region = 'fra'
+
+[build]
+  builder = 'paketobuildpacks/builder:base'
+
+[processes]
+  worker = 'python bot.py'
+"@ | Out-File -FilePath fly.toml -Encoding utf8
