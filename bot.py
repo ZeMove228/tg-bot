@@ -48,7 +48,7 @@ async def check_membership(bot, user_id: int, channel: dict) -> bool:
 def build_channels_keyboard(joined_statuses: list[bool]) -> InlineKeyboardMarkup:
     buttons = []
     for i, channel in enumerate(CHANNELS):
-        status_icon = "✅" if joined_statuses[i] else "🔗"
+        status_icon = "🔗" if joined_statuses[i] else "🔗"
         buttons.append(
             [InlineKeyboardButton(
                 f"{status_icon} {channel['name']}",
